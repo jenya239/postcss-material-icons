@@ -5,7 +5,7 @@ const postcss = require('postcss');
 const replaceAsync = require('string-replace-async');
 
 const cache = cacha('.material-icons/cache');
-const FN_REGEX = /material\(([^\);,!]*)\)/g;
+const FN_REGEX = /material\(([^\)!]*)\)/g;
 
 function toBase64(body) {
 	return new Buffer(body).toString('base64');
