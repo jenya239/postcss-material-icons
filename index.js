@@ -12,7 +12,8 @@ function toBase64(body) {
 }
 
 function fetchIcon(id) {
-	return got(`https://storage.googleapis.com/material-icons/external-assets/v2/icons/svg/${id}`)
+	//https://storage.googleapis.com/material-icons/external-assets/v4/icons/svg/
+	return got(`https://storage.googleapis.com/material-icons/external-assets/v4/icons/svg/${id}`)
 		.then(res => cache.set(id, res.body));
 }
 
@@ -21,6 +22,7 @@ function getIcon(name, color, size) {
 	color = color || 'black';
 	size = size || 24;
 
+	//ic_notifications_none_white_36px.svg
 	const id = `ic_${name}_${color}_${size}px.svg`;
 
 	return cache.get(id)
