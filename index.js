@@ -3,6 +3,8 @@ const got = require('got');
 const cacha = require('cacha');
 const postcss = require('postcss');
 const replaceAsync = require('string-replace-async');
+const fs = require( 'fs' );
+const path =require( 'path' );
 
 const cache = cacha('.material-icons/cache');
 const FN_REGEX = /material\(([^\)!]*)\)/g;
@@ -14,12 +16,15 @@ function toBase64(body) {
 function fetchIcon(id) {
 	//https://storage.googleapis.com/material-icons/external-assets/v4/icons/svg/
 	return got(`https://storage.googleapis.com/material-icons/external-assets/v4/icons/svg/${id}`)
-		.then(res => cache.set(id, res.body));
+		.then(res => cache.set(id, res.body))
+		.catch( error =>{ 
+			return fs.readFileSync( path.resolve( __dirname, 'images', id ) );} );
 }
 
 function getIcon(name, color, size) {
 	name = name.replace(/\s/g, '_');
 	color = color || 'black';
+	color =color.replace( /'|"/g, '' )
 	size = size || 24;
 
 	//ic_notifications_none_white_36px.svg
