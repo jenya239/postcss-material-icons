@@ -15,20 +15,27 @@ function toBase64(body) {
 
 function fetchIcon(id) {
 	//https://storage.googleapis.com/material-icons/external-assets/v4/icons/svg/
-	return got(`https://storage.googleapis.com/material-icons/external-assets/v4/icons/svg/${id}`)
+	//https://material.io/tools/icons/static/icons/outline-add_box-24px.svg
+	//`https://storage.googleapis.com/material-icons/external-assets/v4/icons/svg/${id}`
+	return got(`https://material.io/tools/icons/static/icons/${id}`)
 		.then(res => cache.set(id, res.body))
 		.catch( error =>{ 
 			return fs.readFileSync( path.resolve( __dirname, 'images', id ) );} );
 }
 
-function getIcon(name, color, size) {
+function getIcon(name, theme, size) {
 	name = name.replace(/\s/g, '_');
-	color = color || 'black';
-	color =color.replace( /'|"/g, '' )
-	size = size || 24;
+	theme = theme || 'black';
+	theme =theme.replace( /'|"/g, '' );
+	if( theme =='black' ) theme ='baseline';
+	if( theme =='white' ) theme ='outline';
+	//size = size || 24;
+	size = 24;
 
 	//ic_notifications_none_white_36px.svg
-	const id = `ic_${name}_${color}_${size}px.svg`;
+	//outline-add_box-24px.svg
+	//`ic_${name}_${color}_${size}px.svg`;
+	const id = `${theme}-${name}-${size}px.svg`;
 
 	return cache.get(id)
 		.then(res => res || fetchIcon(id))
