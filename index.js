@@ -17,9 +17,16 @@ function fetchIcon(id) {
 	//https://storage.googleapis.com/material-icons/external-assets/v4/icons/svg/
 	//https://material.io/tools/icons/static/icons/outline-add_box-24px.svg
 	//`https://storage.googleapis.com/material-icons/external-assets/v4/icons/svg/${id}`
-	return got(`https://material.io/tools/icons/static/icons/${id}`)
-		.then(res => cache.set(id, res.body))
+	let url =`https://material.io/tools/icons/static/icons/${id}`;
+	const cache_path =path.resolve( __dirname, 'cache', id );
+	return got(url)
+		.then( res => new Promise( ( resolve, reject ) =>{
+			fs .writeFile( cache_path, res.body, ( err ) => {
+				err ? reject( err ) : resolve( res.body );
+				 } );
+			 } ) )
 		.catch( error =>{ 
+			console .log( 'error', url );
 			return fs.readFileSync( path.resolve( __dirname, 'images', id ) );} );
 }
 
@@ -36,10 +43,20 @@ function getIcon(name, theme, size) {
 	//outline-add_box-24px.svg
 	//`ic_${name}_${color}_${size}px.svg`;
 	const id = `${theme}-${name}-${size}px.svg`;
+	const cache_path =path.resolve( __dirname, 'cache', id );
+	let icon =null;
+	if( fs.existsSync( cache_path ) ){
+		icon =new Promise( ( resolve, reject ) =>{
+			fs .readFile( cache_path, ( err, data ) => {
+				err ? reject( err ) : resolve( data );
+				 } );
+			 } );
+		 }
+	else {
+		icon =fetchIcon( id );
+		 }
 
-	return cache.get(id)
-		.then(res => res || fetchIcon(id))
-		.then(toBase64);
+	return icon .then( toBase64 );
 }
 
 module.exports = postcss.plugin('material-icons', opts => {
