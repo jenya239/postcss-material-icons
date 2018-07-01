@@ -26,7 +26,7 @@ function fetchIcon(id) {
 				 } );
 			 } ) )
 		.catch( error =>{ 
-			console .log( 'error', url );
+			//console .log( 'error', url );
 			return fs.readFileSync( path.resolve( __dirname, 'images', id ) );} );
 }
 
