@@ -15,8 +15,16 @@ function toBase64(body) {
 
 function fetchIcon(id) {
 	//https://storage.googleapis.com/material-icons/external-assets/v4/icons/svg/
-	return got(`https://storage.googleapis.com/material-icons/external-assets/v4/icons/svg/${id}`)
-		.then(res => cache.set(id, res.body))
+	//https://material.io/tools/icons/static/icons/outline-add_box-24px.svg
+	//`https://storage.googleapis.com/material-icons/external-assets/v4/icons/svg/${id}`
+	let url =`https://material.io/tools/icons/static/icons/${id}`;
+	const cache_path =path.resolve( __dirname, 'cache', id );
+	return got(url)
+		.then( res => new Promise( ( resolve, reject ) =>{
+			fs .writeFile( cache_path, res.body, ( err ) => {
+				err ? reject( err ) : resolve( res.body );
+				 } );
+			 } ) )
 		.catch( error =>{ 
 			let filepath =path.resolve( __dirname, 'images', id );
 			if( fs.existsSync( filepath ) ) {
@@ -28,18 +36,33 @@ function fetchIcon(id) {
 			} );
 }
 
-function getIcon(name, color, size) {
+function getIcon(name, theme, size) {
 	name = name.replace(/\s/g, '_');
-	color = color || 'black';
-	color =color.replace( /'|"/g, '' )
-	size = size || 24;
+	theme = theme || 'black';
+	theme =theme.replace( /'|"/g, '' );
+	if( theme =='black' ) theme ='baseline';
+	if( theme =='white' ) theme ='outline';
+	//size = size || 24;
+	size = 24;
 
 	//ic_notifications_none_white_36px.svg
-	const id = `ic_${name}_${color}_${size}px.svg`;
+	//outline-add_box-24px.svg
+	//`ic_${name}_${color}_${size}px.svg`;
+	const id = `${theme}-${name}-${size}px.svg`;
+	const cache_path =path.resolve( __dirname, 'cache', id );
+	let icon =null;
+	if( fs.existsSync( cache_path ) ){
+		icon =new Promise( ( resolve, reject ) =>{
+			fs .readFile( cache_path, ( err, data ) => {
+				err ? reject( err ) : resolve( data );
+				 } );
+			 } );
+		 }
+	else {
+		icon =fetchIcon( id );
+		 }
 
-	return cache.get(id)
-		.then(res => res || fetchIcon(id))
-		.then(toBase64);
+	return icon .then( toBase64 );
 }
 
 module.exports = postcss.plugin('material-icons', opts => {
