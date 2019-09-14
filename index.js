@@ -18,7 +18,14 @@ function fetchIcon(id) {
 	return got(`https://storage.googleapis.com/material-icons/external-assets/v4/icons/svg/${id}`)
 		.then(res => cache.set(id, res.body))
 		.catch( error =>{ 
-			return fs.readFileSync( path.resolve( __dirname, 'images', id ) );} );
+			let filepath =path.resolve( __dirname, 'images', id );
+			if( fs.existsSync( filepath ) ) {
+				return fs.readFileSync( filepath );
+			 }else {
+			 	//console .log( `https://storage.googleapis.com/material-icons/external-assets/v4/icons/svg/${id}` );
+			 	return '';
+			 	 }
+			} );
 }
 
 function getIcon(name, color, size) {
